@@ -117,7 +117,7 @@ public class AtendimentoBO {
         a.setIdPaciente(p);
         a.setIdDentista(d);
         a.setIdCampanha(c);
-        a.setData(DataUtil.parse(r.data()));
+        a.setData(DataUtil.parseDateOrDateTime(r.data()));
         // Constraint CK_ATEND_STATUS exige lowercase ('agendado'/'realizado'/'cancelado').
         a.setStatus(r.status() == null ? null : r.status().toLowerCase());
         a.setTipo(r.tipo());
@@ -131,7 +131,7 @@ public class AtendimentoBO {
                 a.getIdPaciente().getIdPaciente(), a.getIdPaciente().getNome(),
                 a.getIdDentista().getIdDentista(), a.getIdDentista().getNome(),
                 a.getIdCampanha().getIdCampanha(), a.getIdCampanha().getNome(),
-                DataUtil.format(a.getData()), a.getStatus(), a.getTipo(),
+                DataUtil.formatDateTime(a.getData()), a.getStatus(), a.getTipo(),
                 a.getObservacoes());
     }
 

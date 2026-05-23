@@ -25,6 +25,26 @@ public final class DataUtil {
         }
     }
 
+    /**
+     * Aceita tanto "yyyy-MM-dd" quanto "yyyy-MM-dd'T'HH:mm" ou "yyyy-MM-dd'T'HH:mm:ss".
+     * Quando vier só data, considera 00:00:00.
+     */
+    public static Date parseDateOrDateTime(String iso) {
+        if (iso == null || iso.isBlank()) {
+            throw new DadoInvalidoException("Data obrigatoria.");
+        }
+        String[] patterns = { DATE_TIME_PATTERN, "yyyy-MM-dd'T'HH:mm", DATE_PATTERN };
+        for (String p : patterns) {
+            try {
+                SimpleDateFormat fmt = new SimpleDateFormat(p);
+                fmt.setLenient(false);
+                return fmt.parse(iso);
+            } catch (Exception ignored) { /* tenta proximo */ }
+        }
+        throw new DadoInvalidoException(
+                "Data invalida: '" + iso + "'. Use yyyy-MM-dd ou yyyy-MM-dd'T'HH:mm.");
+    }
+
     /** Converte java.util.Date em "yyyy-MM-dd" (ou null). */
     public static String format(Date data) {
         if (data == null) return null;

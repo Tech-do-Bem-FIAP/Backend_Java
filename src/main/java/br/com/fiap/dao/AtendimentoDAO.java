@@ -26,7 +26,7 @@ public class AtendimentoDAO {
                 "T_PACIENTE_ID_PACIENTE, T_DENTISTA_ID_DENTISTA, ID_CAMPANHA) " +
                 "VALUES (SEQ_ATENDIMENTO.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
-        stmt.setDate(1, new java.sql.Date(a.getData().getTime()));
+        stmt.setTimestamp(1, new java.sql.Timestamp(a.getData().getTime()));
         stmt.setString(2, a.getTipo());
         stmt.setString(3, a.getStatus());
         stmt.setString(4, a.getObservacoes());
@@ -43,7 +43,7 @@ public class AtendimentoDAO {
                 "T_PACIENTE_ID_PACIENTE=?, T_DENTISTA_ID_DENTISTA=?, ID_CAMPANHA=? " +
                 "WHERE ID_ATENDIMENTO=?";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
-        stmt.setDate(1, new java.sql.Date(a.getData().getTime()));
+        stmt.setTimestamp(1, new java.sql.Timestamp(a.getData().getTime()));
         stmt.setString(2, a.getTipo());
         stmt.setString(3, a.getStatus());
         stmt.setString(4, a.getObservacoes());
@@ -131,7 +131,7 @@ public class AtendimentoDAO {
         a.setIdPaciente(p);
         a.setIdDentista(d);
         a.setIdCampanha(c);
-        a.setData(rs.getDate("DATA"));
+        a.setData(rs.getTimestamp("DATA"));
         a.setStatus(rs.getString("STATUS"));
         a.setTipo(rs.getString("TIPO"));
         a.setObservacoes(rs.getString("OBSERVACOES"));
