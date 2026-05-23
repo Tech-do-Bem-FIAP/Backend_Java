@@ -168,7 +168,9 @@ public class SolicitacaoBO {
             dao = new ColaboradorDAO();
             dao.inserir(c);
             return dao.ultimoId();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
+            throw SqlConflictDetector.traduzir(e, "criar colaborador da solicitacao");
+        } catch (ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao criar colaborador da solicitacao", e);
         } finally {
             if (dao != null && dao.minhaConexao != null) {

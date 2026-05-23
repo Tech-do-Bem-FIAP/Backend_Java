@@ -53,7 +53,9 @@ public class ColaboradorBO {
             dao.inserir(p);
             int novoId = dao.ultimoId();
             return toResponse(dao.selecionarPorId(novoId));
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
+            throw SqlConflictDetector.traduzir(e, "criar colaborador");
+        } catch (ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao criar colaborador", e);
         } finally {
             fechar(dao);
@@ -76,7 +78,9 @@ public class ColaboradorBO {
             }
             dao.atualizar(p);
             return toResponse(dao.selecionarPorId(id));
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
+            throw SqlConflictDetector.traduzir(e, "atualizar colaborador");
+        } catch (ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao atualizar colaborador", e);
         } finally {
             fechar(dao);

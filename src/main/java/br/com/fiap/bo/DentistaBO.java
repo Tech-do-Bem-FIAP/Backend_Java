@@ -53,7 +53,9 @@ public class DentistaBO {
             dao.inserir(p);
             int novoId = dao.ultimoId();
             return toResponse(dao.selecionarPorId(novoId));
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
+            throw SqlConflictDetector.traduzir(e, "criar dentista");
+        } catch (ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao criar dentista", e);
         } finally {
             fechar(dao);
@@ -76,7 +78,9 @@ public class DentistaBO {
             }
             dao.atualizar(p);
             return toResponse(dao.selecionarPorId(id));
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
+            throw SqlConflictDetector.traduzir(e, "atualizar dentista");
+        } catch (ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao atualizar dentista", e);
         } finally {
             fechar(dao);
