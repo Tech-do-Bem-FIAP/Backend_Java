@@ -17,3 +17,8 @@ quarkus.log
 
 # Env / secrets
 .env
+
+# Local notes (uncommitted)
+/CLAUDE.md
+/MEMORY.md
+/.claude/

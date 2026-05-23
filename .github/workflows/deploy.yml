@@ -1,0 +1,38 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t tech-do-bem-backend-java:${{ github.sha }} \
+            -t tech-do-bem-backend-java:latest \
+            .
+
+      - name: Stop old container
+        run: docker stop tech-do-bem-backend-java || true
+
+      - name: Remove old container
+        run: docker rm tech-do-bem-backend-java || true
+
+      - name: Run new container
+        env:
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          docker run -d \
+            --name tech-do-bem-backend-java \
+            --restart always \
+            -p 127.0.0.1:8080:8080 \
+            -e DB_USER="$DB_USER" \
+            -e DB_PASSWORD="$DB_PASSWORD" \
+            tech-do-bem-backend-java:latest
