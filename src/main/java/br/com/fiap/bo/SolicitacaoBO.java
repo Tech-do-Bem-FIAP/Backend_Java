@@ -92,28 +92,28 @@ public class SolicitacaoBO {
         if (req.status() == null || !STATUS_REVISAO.contains(req.status().toLowerCase())) {
             throw new DadoInvalidoException("status deve ser 'aprovada' ou 'rejeitada'.");
         }
+        String statusNovo = req.status().toLowerCase();
+
+        // 1) Lê a solicitação atual e fecha a conexão imediatamente — o DB da FIAP
+        // não gosta de conexões simultâneas dentro da mesma chamada.
+        Solicitacao atual = buscarComConexaoEfemera(id);
+        if (!"pendente".equalsIgnoreCase(atual.getStatus())) {
+            throw new DadoInvalidoException(
+                    "Solicitacao ja foi revisada (status atual: " + atual.getStatus() + ").");
+        }
+        boolean externa = atual.getIdSolicitante() == null
+                && atual.getNomeExterno() != null;
+
+        // 2) Aprovação externa: cria o colaborador antes (conexão própria, fechada no fim).
+        Integer idColabCriado = null;
+        if (statusNovo.equals("aprovada") && externa) {
+            idColabCriado = criarColaboradorDeSolicitacao(atual, req.cargo());
+        }
+
+        // 3) Marca a solicitação como revisada.
         SolicitacaoDAO dao = null;
         try {
             dao = new SolicitacaoDAO();
-            Solicitacao atual = dao.selecionarPorId(id);
-            if (atual == null) {
-                throw new RecursoNaoEncontradoException("Solicitacao " + id + " nao encontrada.");
-            }
-            if (!"pendente".equalsIgnoreCase(atual.getStatus())) {
-                throw new DadoInvalidoException(
-                        "Solicitacao ja foi revisada (status atual: " + atual.getStatus() + ").");
-            }
-
-            String statusNovo = req.status().toLowerCase();
-            boolean externa = atual.getIdSolicitante() == null
-                    && atual.getNomeExterno() != null;
-
-            Integer idColabCriado = null;
-            // Aprovação de solicitação externa: cria o colaborador antes de revisar.
-            if (statusNovo.equals("aprovada") && externa) {
-                idColabCriado = criarColaboradorDeSolicitacao(atual, req.cargo());
-            }
-
             dao.revisar(id, statusNovo, req.idRevisor(),
                     req.comentario(), new Date());
             return toResponse(dao.selecionarPorId(id), idColabCriado);
@@ -124,9 +124,24 @@ public class SolicitacaoBO {
         }
     }
 
+    private Solicitacao buscarComConexaoEfemera(int id) {
+        SolicitacaoDAO dao = null;
+        try {
+            dao = new SolicitacaoDAO();
+            Solicitacao s = dao.selecionarPorId(id);
+            if (s == null) {
+                throw new RecursoNaoEncontradoException("Solicitacao " + id + " nao encontrada.");
+            }
+            return s;
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new PersistenciaException("Erro ao buscar solicitacao", e);
+        } finally {
+            fechar(dao);
+        }
+    }
+
     /** Cria T_COLABORADOR usando os dados externos da solicitação. */
-    private Integer criarColaboradorDeSolicitacao(Solicitacao s, String cargo)
-            throws SQLException, ClassNotFoundException {
+    private Integer criarColaboradorDeSolicitacao(Solicitacao s, String cargo) {
         if (cargo == null || cargo.isBlank() || !CARGOS.contains(cargo)) {
             throw new DadoInvalidoException(
                     "Para aprovar pedido externo, informe um cargo valido "
@@ -147,12 +162,15 @@ public class SolicitacaoBO {
             throw new DadoInvalidoException(
                     "CPF da solicitacao invalido (esperado 11 digitos).");
         }
-        ColaboradorDAO dao = new ColaboradorDAO();
+        ColaboradorDAO dao = null;
         try {
+            dao = new ColaboradorDAO();
             dao.inserir(c);
             return dao.ultimoId();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new PersistenciaException("Erro ao criar colaborador da solicitacao", e);
         } finally {
-            if (dao.minhaConexao != null) {
+            if (dao != null && dao.minhaConexao != null) {
                 try { dao.minhaConexao.close(); } catch (SQLException ignored) {}
             }
         }
