@@ -23,7 +23,8 @@ public class SolicitacaoBO {
     private static final Set<String> STATUS_REVISAO = Set.of("aprovada", "rejeitada");
     private static final Set<String> CARGOS = Set.of(
             "Administrador", "Coordenador", "Auxiliar", "Estagiário");
-    private static final int DISPONIBILIDADE_DEFAULT = 40;
+    /** T_COLABORADOR.DISPONIBILIDADE é booleano (0/1): 1 = disponível. */
+    private static final int DISPONIBILIDADE_DEFAULT = 1;
 
     public List<SolicitacaoResponse> listar() {
         SolicitacaoDAO dao = null;
