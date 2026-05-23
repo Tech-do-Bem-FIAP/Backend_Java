@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+
+# Java / Maven
+target/
+*.class
+.quarkus/
+quarkus.log
+
+# IDE
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# Env / secrets
+.env
