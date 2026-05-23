@@ -21,12 +21,12 @@ public class AuthBO {
 
         Colaborador c = buscarColaborador(req.email(), req.senha());
         if (c != null) {
-            return new LoginResponse("colaborador", c.getIdColaborador(), c.getNome());
+            return new LoginResponse("colaborador", c.getIdColaborador(), c.getNome(), c.getCargo());
         }
 
         Dentista d = buscarDentista(req.email(), req.senha());
         if (d != null) {
-            return new LoginResponse("dentista", d.getIdDentista(), d.getNome());
+            return new LoginResponse("dentista", d.getIdDentista(), d.getNome(), null);
         }
 
         throw new DadoInvalidoException("Email ou senha invalidos.");
