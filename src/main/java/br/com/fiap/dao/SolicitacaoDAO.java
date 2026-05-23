@@ -23,12 +23,17 @@ public class SolicitacaoDAO {
     public void inserir(Solicitacao s) throws SQLException {
         String sql = "INSERT INTO T_SOLICITACAO " +
                 "(ID_SOLICITACAO, T_COLABORADOR_ID_SOLICITANTE, TIPO, DESCRICAO, " +
-                "STATUS, DATA_SOLICITACAO) " +
-                "VALUES (SEQ_SOLICITACAO.NEXTVAL, ?, ?, ?, 'pendente', SYSTIMESTAMP)";
+                "STATUS, DATA_SOLICITACAO, " +
+                "NOME_EXTERNO, EMAIL_EXTERNO, SENHA_EXTERNO, TELEFONE_EXTERNO) " +
+                "VALUES (SEQ_SOLICITACAO.NEXTVAL, ?, ?, ?, 'pendente', SYSTIMESTAMP, ?, ?, ?, ?)";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
-        stmt.setInt(1, s.getIdSolicitante());
+        setNullableInt(stmt, 1, s.getIdSolicitante());
         stmt.setString(2, s.getTipo());
         stmt.setString(3, s.getDescricao());
+        setNullableString(stmt, 4, s.getNomeExterno());
+        setNullableString(stmt, 5, s.getEmailExterno());
+        setNullableString(stmt, 6, s.getSenhaExterno());
+        setNullableString(stmt, 7, s.getTelefoneExterno());
         stmt.execute();
         stmt.close();
     }
@@ -41,11 +46,7 @@ public class SolicitacaoDAO {
         stmt.setString(1, status);
         stmt.setInt(2, idRevisor);
         stmt.setTimestamp(3, new Timestamp(momento.getTime()));
-        if (comentario != null && !comentario.isBlank()) {
-            stmt.setString(4, comentario);
-        } else {
-            stmt.setNull(4, Types.VARCHAR);
-        }
+        setNullableString(stmt, 4, comentario);
         stmt.setInt(5, id);
         int rows = stmt.executeUpdate();
         stmt.close();
@@ -94,10 +95,25 @@ public class SolicitacaoDAO {
                 "LEFT JOIN T_COLABORADOR REV ON S.T_COLABORADOR_ID_REVISOR = REV.ID_COLABORADOR";
     }
 
+    private void setNullableInt(PreparedStatement stmt, int idx, Integer value)
+            throws SQLException {
+        if (value != null) stmt.setInt(idx, value);
+        else stmt.setNull(idx, Types.INTEGER);
+    }
+
+    private void setNullableString(PreparedStatement stmt, int idx, String value)
+            throws SQLException {
+        if (value != null && !value.isBlank()) stmt.setString(idx, value);
+        else stmt.setNull(idx, Types.VARCHAR);
+    }
+
     private Solicitacao mapear(ResultSet rs) throws SQLException {
         Solicitacao s = new Solicitacao();
         s.setIdSolicitacao(rs.getInt("ID_SOLICITACAO"));
-        s.setIdSolicitante(rs.getInt("T_COLABORADOR_ID_SOLICITANTE"));
+
+        int idSol = rs.getInt("T_COLABORADOR_ID_SOLICITANTE");
+        s.setIdSolicitante(rs.wasNull() ? null : idSol);
+
         s.setTipo(rs.getString("TIPO"));
         s.setDescricao(rs.getString("DESCRICAO"));
         s.setStatus(rs.getString("STATUS"));
@@ -110,6 +126,11 @@ public class SolicitacaoDAO {
         s.setDataRevisao(tsRev);
 
         s.setComentarioRevisao(rs.getString("COMENTARIO_REVISAO"));
+
+        s.setNomeExterno(rs.getString("NOME_EXTERNO"));
+        s.setEmailExterno(rs.getString("EMAIL_EXTERNO"));
+        s.setSenhaExterno(rs.getString("SENHA_EXTERNO"));
+        s.setTelefoneExterno(rs.getString("TELEFONE_EXTERNO"));
 
         try {
             s.setNomeSolicitante(rs.getString("NOME_SOLICITANTE"));

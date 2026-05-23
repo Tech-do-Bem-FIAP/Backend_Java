@@ -5,7 +5,8 @@ import java.util.Date;
 public class Solicitacao {
 
     private int     idSolicitacao;
-    private int     idSolicitante;
+    /** Null quando a solicitação vem de alguém ainda não cadastrado (pedido de cadastro). */
+    private Integer idSolicitante;
     private String  tipo;
     private String  descricao;
     private String  status;          // 'pendente' | 'aprovada' | 'rejeitada'
@@ -13,6 +14,12 @@ public class Solicitacao {
     private Integer idRevisor;       // null enquanto pendente
     private Date    dataRevisao;     // null enquanto pendente
     private String  comentarioRevisao;
+
+    // Solicitante externo (presente quando idSolicitante é null).
+    private String nomeExterno;
+    private String emailExterno;
+    private String senhaExterno;
+    private String telefoneExterno;
 
     private String nomeSolicitante;
     private String nomeRevisor;
@@ -22,8 +29,8 @@ public class Solicitacao {
     public int getIdSolicitacao() { return idSolicitacao; }
     public void setIdSolicitacao(int v) { this.idSolicitacao = v; }
 
-    public int getIdSolicitante() { return idSolicitante; }
-    public void setIdSolicitante(int v) { this.idSolicitante = v; }
+    public Integer getIdSolicitante() { return idSolicitante; }
+    public void setIdSolicitante(Integer v) { this.idSolicitante = v; }
 
     public String getTipo() { return tipo; }
     public void setTipo(String v) { this.tipo = v; }
@@ -45,6 +52,18 @@ public class Solicitacao {
 
     public String getComentarioRevisao() { return comentarioRevisao; }
     public void setComentarioRevisao(String v) { this.comentarioRevisao = v; }
+
+    public String getNomeExterno() { return nomeExterno; }
+    public void setNomeExterno(String v) { this.nomeExterno = v; }
+
+    public String getEmailExterno() { return emailExterno; }
+    public void setEmailExterno(String v) { this.emailExterno = v; }
+
+    public String getSenhaExterno() { return senhaExterno; }
+    public void setSenhaExterno(String v) { this.senhaExterno = v; }
+
+    public String getTelefoneExterno() { return telefoneExterno; }
+    public void setTelefoneExterno(String v) { this.telefoneExterno = v; }
 
     public String getNomeSolicitante() { return nomeSolicitante; }
     public void setNomeSolicitante(String v) { this.nomeSolicitante = v; }
