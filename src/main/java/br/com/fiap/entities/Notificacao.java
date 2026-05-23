@@ -14,6 +14,11 @@ public class Notificacao {
     private Integer idPaciente;
     private Date    dataLeitura;
 
+    // Campos enriquecidos via JOIN — não persistidos.
+    private String  nomeDentista;
+    private String  nomeColaborador;
+    private String  nomePaciente;
+
     public Notificacao() {
     }
 
@@ -107,4 +112,13 @@ public class Notificacao {
 
     public Date getDataLeitura() { return dataLeitura; }
     public void setDataLeitura(Date dataLeitura) { this.dataLeitura = dataLeitura; }
+
+    public String getNomeDentista() { return nomeDentista; }
+    public void setNomeDentista(String nomeDentista) { this.nomeDentista = nomeDentista; }
+
+    public String getNomeColaborador() { return nomeColaborador; }
+    public void setNomeColaborador(String nomeColaborador) { this.nomeColaborador = nomeColaborador; }
+
+    public String getNomePaciente() { return nomePaciente; }
+    public void setNomePaciente(String nomePaciente) { this.nomePaciente = nomePaciente; }
 }

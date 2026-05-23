@@ -9,4 +9,7 @@ public record NotificacaoResponse(
         Integer idDentista,
         Integer idColaborador,
         Integer idPaciente,
-        String dataLeitura) {}
+        String dataLeitura,
+        String nomeDentista,
+        String nomeColaborador,
+        String nomePaciente) {}

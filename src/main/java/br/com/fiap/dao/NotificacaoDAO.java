@@ -80,7 +80,7 @@ public class NotificacaoDAO {
 
     public ArrayList<Notificacao> selecionar() throws SQLException {
         ArrayList<Notificacao> lista = new ArrayList<>();
-        String sql = "SELECT * FROM T_NOTIFICACAO ORDER BY DATA_ENVIO DESC";
+        String sql = baseSelect() + " ORDER BY N.DATA_ENVIO DESC";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
@@ -91,7 +91,7 @@ public class NotificacaoDAO {
 
     public Notificacao selecionarPorId(int id) throws SQLException {
         Notificacao n = null;
-        String sql = "SELECT * FROM T_NOTIFICACAO WHERE ID_NOTIFICACAO=?";
+        String sql = baseSelect() + " WHERE N.ID_NOTIFICACAO=?";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         stmt.setInt(1, id);
         ResultSet rs = stmt.executeQuery();
@@ -99,6 +99,17 @@ public class NotificacaoDAO {
             n = mapear(rs);
         }
         return n;
+    }
+
+    private String baseSelect() {
+        return "SELECT N.*, " +
+                "D.NOME AS NOME_DENTISTA, " +
+                "C.NOME AS NOME_COLABORADOR, " +
+                "P.NOME AS NOME_PACIENTE " +
+                "FROM T_NOTIFICACAO N " +
+                "LEFT JOIN T_DENTISTA D ON N.T_DENTISTA_ID_DENTISTA = D.ID_DENTISTA " +
+                "LEFT JOIN T_COLABORADOR C ON N.T_COLABORADOR_ID_COLABORADOR = C.ID_COLABORADOR " +
+                "LEFT JOIN T_PACIENTE P ON N.T_PACIENTE_ID_PACIENTE = P.ID_PACIENTE";
     }
 
     /** Retorna o último ID gerado pela sequência nesta sessão. */
@@ -147,6 +158,15 @@ public class NotificacaoDAO {
 
         Timestamp ts = rs.getTimestamp("DATA_LEITURA");
         n.setDataLeitura(ts);
+
+        // Campos enriquecidos (podem não vir se for INSERT antigo ou caso sem JOIN).
+        try {
+            n.setNomeDentista(rs.getString("NOME_DENTISTA"));
+            n.setNomeColaborador(rs.getString("NOME_COLABORADOR"));
+            n.setNomePaciente(rs.getString("NOME_PACIENTE"));
+        } catch (SQLException ignored) {
+            // Coluna não existe se um SELECT * sem JOIN for usado em algum legado.
+        }
 
         return n;
     }

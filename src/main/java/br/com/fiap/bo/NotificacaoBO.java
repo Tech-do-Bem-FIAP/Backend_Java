@@ -173,7 +173,10 @@ public class NotificacaoBO {
                 n.getIdDentista(),
                 n.getIdColaborador(),
                 n.getIdPaciente(),
-                DataUtil.formatDateTime(n.getDataLeitura()));
+                DataUtil.formatDateTime(n.getDataLeitura()),
+                n.getNomeDentista(),
+                n.getNomeColaborador(),
+                n.getNomePaciente());
     }
 
     private void fechar(NotificacaoDAO dao) {
