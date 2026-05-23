@@ -66,8 +66,13 @@ public class DentistaBO {
         DentistaDAO dao = null;
         try {
             dao = new DentistaDAO();
-            if (dao.selecionarPorId(id) == null) {
+            Dentista atual = dao.selecionarPorId(id);
+            if (atual == null) {
                 throw new RecursoNaoEncontradoException("Dentista " + id + " nao encontrado.");
+            }
+            // Preserva senha atual quando o cliente não envia senha nova.
+            if (p.getSenha() == null || p.getSenha().isBlank()) {
+                p.setSenha(atual.getSenha());
             }
             dao.atualizar(p);
             return toResponse(dao.selecionarPorId(id));
