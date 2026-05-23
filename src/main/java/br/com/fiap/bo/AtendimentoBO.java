@@ -118,7 +118,8 @@ public class AtendimentoBO {
         a.setIdDentista(d);
         a.setIdCampanha(c);
         a.setData(DataUtil.parse(r.data()));
-        a.setStatus(r.status());
+        // Constraint CK_ATEND_STATUS exige lowercase ('agendado'/'realizado'/'cancelado').
+        a.setStatus(r.status() == null ? null : r.status().toLowerCase());
         a.setTipo(r.tipo());
         a.setObservacoes(r.observacoes());
         return a;
