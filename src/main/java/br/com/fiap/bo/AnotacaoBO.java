@@ -18,7 +18,7 @@ import java.util.Set;
 public class AnotacaoBO {
 
     private static final Set<String> AUTOR_TIPOS = Set.of("dentista", "colaborador");
-    private static final Set<String> SOBRE_TIPOS = Set.of("dentista", "paciente");
+    private static final Set<String> SOBRE_TIPOS = Set.of("dentista", "paciente", "atendimento");
 
     public List<AnotacaoResponse> listarPorSobre(String sobreTipo, int sobreId) {
         validarSobreTipo(sobreTipo);
@@ -84,7 +84,8 @@ public class AnotacaoBO {
 
     private void validarSobreTipo(String t) {
         if (t == null || !SOBRE_TIPOS.contains(t.toLowerCase())) {
-            throw new DadoInvalidoException("sobreTipo deve ser 'dentista' ou 'paciente'.");
+            throw new DadoInvalidoException(
+                    "sobreTipo deve ser 'dentista', 'paciente' ou 'atendimento'.");
         }
     }
 
