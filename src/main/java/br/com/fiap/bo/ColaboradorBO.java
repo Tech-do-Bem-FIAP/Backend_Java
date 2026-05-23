@@ -66,8 +66,13 @@ public class ColaboradorBO {
         ColaboradorDAO dao = null;
         try {
             dao = new ColaboradorDAO();
-            if (dao.selecionarPorId(id) == null) {
+            Colaborador atual = dao.selecionarPorId(id);
+            if (atual == null) {
                 throw new RecursoNaoEncontradoException("Colaborador " + id + " nao encontrado.");
+            }
+            // Preserva senha atual quando o cliente não envia senha nova.
+            if (p.getSenha() == null || p.getSenha().isBlank()) {
+                p.setSenha(atual.getSenha());
             }
             dao.atualizar(p);
             return toResponse(dao.selecionarPorId(id));
