@@ -13,6 +13,9 @@ public record SolicitacaoResponse(
         String dataRevisao,
         String comentarioRevisao,
         String nomeExterno,
+        String cpfExterno,
         String emailExterno,
         String senhaExterno,
-        String telefoneExterno) {}
+        String telefoneExterno,
+        /** Quando uma solicitação externa é aprovada, o colaborador recém-criado. */
+        Integer idColaboradorCriado) {}

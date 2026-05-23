@@ -1,9 +1,11 @@
 package br.com.fiap.bo;
 
+import br.com.fiap.dao.ColaboradorDAO;
 import br.com.fiap.dao.SolicitacaoDAO;
 import br.com.fiap.dto.SolicitacaoRequest;
 import br.com.fiap.dto.SolicitacaoResponse;
 import br.com.fiap.dto.SolicitacaoReviewRequest;
+import br.com.fiap.entities.Colaborador;
 import br.com.fiap.entities.Solicitacao;
 import br.com.fiap.exceptions.DadoInvalidoException;
 import br.com.fiap.exceptions.PersistenciaException;
@@ -19,13 +21,16 @@ import java.util.Set;
 public class SolicitacaoBO {
 
     private static final Set<String> STATUS_REVISAO = Set.of("aprovada", "rejeitada");
+    private static final Set<String> CARGOS = Set.of(
+            "Administrador", "Coordenador", "Auxiliar", "Estagiário");
+    private static final int DISPONIBILIDADE_DEFAULT = 40;
 
     public List<SolicitacaoResponse> listar() {
         SolicitacaoDAO dao = null;
         try {
             dao = new SolicitacaoDAO();
             List<SolicitacaoResponse> out = new ArrayList<>();
-            for (Solicitacao s : dao.selecionar()) out.add(toResponse(s));
+            for (Solicitacao s : dao.selecionar()) out.add(toResponse(s, null));
             return out;
         } catch (SQLException | ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao listar solicitacoes", e);
@@ -42,7 +47,7 @@ public class SolicitacaoBO {
             if (s == null) {
                 throw new RecursoNaoEncontradoException("Solicitacao " + id + " nao encontrada.");
             }
-            return toResponse(s);
+            return toResponse(s, null);
         } catch (SQLException | ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao buscar solicitacao", e);
         } finally {
@@ -60,8 +65,10 @@ public class SolicitacaoBO {
         if (externo) {
             s.setIdSolicitante(null);
             s.setNomeExterno(req.nomeExterno().trim());
+            s.setCpfExterno(
+                    req.cpfExterno() != null ? req.cpfExterno().trim() : null);
             s.setEmailExterno(req.emailExterno().trim());
-            s.setSenhaExterno(req.senhaExterno()); // mantém como veio (sem trim)
+            s.setSenhaExterno(req.senhaExterno()); // sem trim (senha)
             s.setTelefoneExterno(
                     req.telefoneExterno() != null ? req.telefoneExterno().trim() : null);
         } else {
@@ -73,7 +80,7 @@ public class SolicitacaoBO {
             dao = new SolicitacaoDAO();
             dao.inserir(s);
             int novoId = dao.ultimoId();
-            return toResponse(dao.selecionarPorId(novoId));
+            return toResponse(dao.selecionarPorId(novoId), null);
         } catch (SQLException | ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao criar solicitacao", e);
         } finally {
@@ -96,13 +103,58 @@ public class SolicitacaoBO {
                 throw new DadoInvalidoException(
                         "Solicitacao ja foi revisada (status atual: " + atual.getStatus() + ").");
             }
-            dao.revisar(id, req.status().toLowerCase(), req.idRevisor(),
+
+            String statusNovo = req.status().toLowerCase();
+            boolean externa = atual.getIdSolicitante() == null
+                    && atual.getNomeExterno() != null;
+
+            Integer idColabCriado = null;
+            // Aprovação de solicitação externa: cria o colaborador antes de revisar.
+            if (statusNovo.equals("aprovada") && externa) {
+                idColabCriado = criarColaboradorDeSolicitacao(atual, req.cargo());
+            }
+
+            dao.revisar(id, statusNovo, req.idRevisor(),
                     req.comentario(), new Date());
-            return toResponse(dao.selecionarPorId(id));
+            return toResponse(dao.selecionarPorId(id), idColabCriado);
         } catch (SQLException | ClassNotFoundException e) {
             throw new PersistenciaException("Erro ao revisar solicitacao", e);
         } finally {
             fechar(dao);
+        }
+    }
+
+    /** Cria T_COLABORADOR usando os dados externos da solicitação. */
+    private Integer criarColaboradorDeSolicitacao(Solicitacao s, String cargo)
+            throws SQLException, ClassNotFoundException {
+        if (cargo == null || cargo.isBlank() || !CARGOS.contains(cargo)) {
+            throw new DadoInvalidoException(
+                    "Para aprovar pedido externo, informe um cargo valido "
+                    + "(Administrador, Coordenador, Auxiliar ou Estagiário).");
+        }
+        if (s.getCpfExterno() == null || s.getCpfExterno().isBlank()) {
+            throw new DadoInvalidoException(
+                    "Solicitacao externa nao tem CPF; nao da pra criar o colaborador.");
+        }
+        Colaborador c = new Colaborador(0,
+                s.getNomeExterno(),
+                s.getCpfExterno(),
+                s.getEmailExterno(),
+                s.getSenhaExterno(),
+                cargo,
+                DISPONIBILIDADE_DEFAULT);
+        if (!c.cpfValido()) {
+            throw new DadoInvalidoException(
+                    "CPF da solicitacao invalido (esperado 11 digitos).");
+        }
+        ColaboradorDAO dao = new ColaboradorDAO();
+        try {
+            dao.inserir(c);
+            return dao.ultimoId();
+        } finally {
+            if (dao.minhaConexao != null) {
+                try { dao.minhaConexao.close(); } catch (SQLException ignored) {}
+            }
         }
     }
 
@@ -149,7 +201,7 @@ public class SolicitacaoBO {
         }
     }
 
-    private SolicitacaoResponse toResponse(Solicitacao s) {
+    private SolicitacaoResponse toResponse(Solicitacao s, Integer idColaboradorCriado) {
         return new SolicitacaoResponse(
                 s.getIdSolicitacao(),
                 s.getIdSolicitante(),
@@ -163,9 +215,11 @@ public class SolicitacaoBO {
                 s.getDataRevisao() != null ? DataUtil.format(s.getDataRevisao()) : null,
                 s.getComentarioRevisao(),
                 s.getNomeExterno(),
+                s.getCpfExterno(),
                 s.getEmailExterno(),
                 s.getSenhaExterno(),
-                s.getTelefoneExterno());
+                s.getTelefoneExterno(),
+                idColaboradorCriado);
     }
 
     private void fechar(SolicitacaoDAO dao) {

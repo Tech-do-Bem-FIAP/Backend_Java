@@ -17,6 +17,7 @@ public class Solicitacao {
 
     // Solicitante externo (presente quando idSolicitante é null).
     private String nomeExterno;
+    private String cpfExterno;
     private String emailExterno;
     private String senhaExterno;
     private String telefoneExterno;
@@ -55,6 +56,9 @@ public class Solicitacao {
 
     public String getNomeExterno() { return nomeExterno; }
     public void setNomeExterno(String v) { this.nomeExterno = v; }
+
+    public String getCpfExterno() { return cpfExterno; }
+    public void setCpfExterno(String v) { this.cpfExterno = v; }
 
     public String getEmailExterno() { return emailExterno; }
     public void setEmailExterno(String v) { this.emailExterno = v; }

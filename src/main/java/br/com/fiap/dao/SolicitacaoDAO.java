@@ -24,16 +24,17 @@ public class SolicitacaoDAO {
         String sql = "INSERT INTO T_SOLICITACAO " +
                 "(ID_SOLICITACAO, T_COLABORADOR_ID_SOLICITANTE, TIPO, DESCRICAO, " +
                 "STATUS, DATA_SOLICITACAO, " +
-                "NOME_EXTERNO, EMAIL_EXTERNO, SENHA_EXTERNO, TELEFONE_EXTERNO) " +
-                "VALUES (SEQ_SOLICITACAO.NEXTVAL, ?, ?, ?, 'pendente', SYSTIMESTAMP, ?, ?, ?, ?)";
+                "NOME_EXTERNO, CPF_EXTERNO, EMAIL_EXTERNO, SENHA_EXTERNO, TELEFONE_EXTERNO) " +
+                "VALUES (SEQ_SOLICITACAO.NEXTVAL, ?, ?, ?, 'pendente', SYSTIMESTAMP, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         setNullableInt(stmt, 1, s.getIdSolicitante());
         stmt.setString(2, s.getTipo());
         stmt.setString(3, s.getDescricao());
         setNullableString(stmt, 4, s.getNomeExterno());
-        setNullableString(stmt, 5, s.getEmailExterno());
-        setNullableString(stmt, 6, s.getSenhaExterno());
-        setNullableString(stmt, 7, s.getTelefoneExterno());
+        setNullableString(stmt, 5, s.getCpfExterno());
+        setNullableString(stmt, 6, s.getEmailExterno());
+        setNullableString(stmt, 7, s.getSenhaExterno());
+        setNullableString(stmt, 8, s.getTelefoneExterno());
         stmt.execute();
         stmt.close();
     }
@@ -128,6 +129,7 @@ public class SolicitacaoDAO {
         s.setComentarioRevisao(rs.getString("COMENTARIO_REVISAO"));
 
         s.setNomeExterno(rs.getString("NOME_EXTERNO"));
+        s.setCpfExterno(rs.getString("CPF_EXTERNO"));
         s.setEmailExterno(rs.getString("EMAIL_EXTERNO"));
         s.setSenhaExterno(rs.getString("SENHA_EXTERNO"));
         s.setTelefoneExterno(rs.getString("TELEFONE_EXTERNO"));
