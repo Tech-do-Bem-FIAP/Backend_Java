@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 
@@ -21,8 +22,9 @@ public class NotificacaoDAO {
     public String inserir(Notificacao n) throws SQLException {
         String sql = "INSERT INTO T_NOTIFICACAO " +
                 "(ID_NOTIFICACAO, MENSAGEM, DATA_ENVIO, STATUS_ENVIO, CANAL, " +
-                "T_DENTISTA_ID_DENTISTA, T_COLABORADOR_ID_COLABORADOR) " +
-                "VALUES (SEQ_NOTIFICACAO.NEXTVAL, ?, ?, ?, ?, ?, ?)";
+                "T_DENTISTA_ID_DENTISTA, T_COLABORADOR_ID_COLABORADOR, " +
+                "T_PACIENTE_ID_PACIENTE, DATA_LEITURA) " +
+                "VALUES (SEQ_NOTIFICACAO.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         stmt.setString(1, n.getMensagem());
         stmt.setDate(2, new java.sql.Date(n.getDataEnvio().getTime()));
@@ -30,6 +32,8 @@ public class NotificacaoDAO {
         stmt.setString(4, n.getCanal());
         setNullableInt(stmt, 5, n.getIdDentista());
         setNullableInt(stmt, 6, n.getIdColaborador());
+        setNullableInt(stmt, 7, n.getIdPaciente());
+        setNullableTimestamp(stmt, 8, n.getDataLeitura());
         stmt.execute();
         stmt.close();
         return "Notificacao cadastrada com sucesso!";
@@ -37,8 +41,8 @@ public class NotificacaoDAO {
 
     public String atualizar(Notificacao n) throws SQLException {
         String sql = "UPDATE T_NOTIFICACAO SET MENSAGEM=?, DATA_ENVIO=?, STATUS_ENVIO=?, " +
-                "CANAL=?, T_DENTISTA_ID_DENTISTA=?, T_COLABORADOR_ID_COLABORADOR=? " +
-                "WHERE ID_NOTIFICACAO=?";
+                "CANAL=?, T_DENTISTA_ID_DENTISTA=?, T_COLABORADOR_ID_COLABORADOR=?, " +
+                "T_PACIENTE_ID_PACIENTE=?, DATA_LEITURA=? WHERE ID_NOTIFICACAO=?";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         stmt.setString(1, n.getMensagem());
         stmt.setDate(2, new java.sql.Date(n.getDataEnvio().getTime()));
@@ -46,10 +50,23 @@ public class NotificacaoDAO {
         stmt.setString(4, n.getCanal());
         setNullableInt(stmt, 5, n.getIdDentista());
         setNullableInt(stmt, 6, n.getIdColaborador());
-        stmt.setInt(7, n.getIdNotificacao());
+        setNullableInt(stmt, 7, n.getIdPaciente());
+        setNullableTimestamp(stmt, 8, n.getDataLeitura());
+        stmt.setInt(9, n.getIdNotificacao());
         stmt.executeUpdate();
         stmt.close();
         return "Notificacao atualizada com sucesso!";
+    }
+
+    /** Grava o timestamp de leitura. Retorna true se algum registro foi afetado. */
+    public boolean marcarLida(int id, java.util.Date momento) throws SQLException {
+        String sql = "UPDATE T_NOTIFICACAO SET DATA_LEITURA=? WHERE ID_NOTIFICACAO=?";
+        PreparedStatement stmt = minhaConexao.prepareStatement(sql);
+        stmt.setTimestamp(1, new Timestamp(momento.getTime()));
+        stmt.setInt(2, id);
+        int rows = stmt.executeUpdate();
+        stmt.close();
+        return rows > 0;
     }
 
     public String deletar(int id) throws SQLException {
@@ -102,6 +119,15 @@ public class NotificacaoDAO {
         }
     }
 
+    private void setNullableTimestamp(PreparedStatement stmt, int idx, java.util.Date value)
+            throws SQLException {
+        if (value != null) {
+            stmt.setTimestamp(idx, new Timestamp(value.getTime()));
+        } else {
+            stmt.setNull(idx, Types.TIMESTAMP);
+        }
+    }
+
     private Notificacao mapear(ResultSet rs) throws SQLException {
         Notificacao n = new Notificacao();
         n.setIdNotificacao(rs.getInt("ID_NOTIFICACAO"));
@@ -109,10 +135,19 @@ public class NotificacaoDAO {
         n.setDataEnvio(rs.getDate("DATA_ENVIO"));
         n.setStatusEnvio(rs.getString("STATUS_ENVIO"));
         n.setCanal(rs.getString("CANAL"));
+
         int idDent = rs.getInt("T_DENTISTA_ID_DENTISTA");
         n.setIdDentista(rs.wasNull() ? null : idDent);
+
         int idColab = rs.getInt("T_COLABORADOR_ID_COLABORADOR");
         n.setIdColaborador(rs.wasNull() ? null : idColab);
+
+        int idPac = rs.getInt("T_PACIENTE_ID_PACIENTE");
+        n.setIdPaciente(rs.wasNull() ? null : idPac);
+
+        Timestamp ts = rs.getTimestamp("DATA_LEITURA");
+        n.setDataLeitura(ts);
+
         return n;
     }
 }

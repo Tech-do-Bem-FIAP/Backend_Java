@@ -6,6 +6,9 @@ import java.util.Date;
 
 public final class DataUtil {
 
+    private static final String DATE_PATTERN     = "yyyy-MM-dd";
+    private static final String DATE_TIME_PATTERN = "yyyy-MM-dd'T'HH:mm:ss";
+
     private DataUtil() {}
 
     /** Converte "yyyy-MM-dd" em java.util.Date. Lanca 400 se invalida. */
@@ -14,7 +17,7 @@ public final class DataUtil {
             throw new DadoInvalidoException("Data obrigatoria no formato yyyy-MM-dd.");
         }
         try {
-            SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+            SimpleDateFormat fmt = new SimpleDateFormat(DATE_PATTERN);
             fmt.setLenient(false);
             return fmt.parse(iso);
         } catch (Exception e) {
@@ -25,6 +28,12 @@ public final class DataUtil {
     /** Converte java.util.Date em "yyyy-MM-dd" (ou null). */
     public static String format(Date data) {
         if (data == null) return null;
-        return new SimpleDateFormat("yyyy-MM-dd").format(data);
+        return new SimpleDateFormat(DATE_PATTERN).format(data);
+    }
+
+    /** Converte java.util.Date em "yyyy-MM-dd'T'HH:mm:ss" (ou null). */
+    public static String formatDateTime(Date data) {
+        if (data == null) return null;
+        return new SimpleDateFormat(DATE_TIME_PATTERN).format(data);
     }
 }

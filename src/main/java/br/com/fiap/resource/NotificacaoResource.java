@@ -6,6 +6,7 @@ import br.com.fiap.dto.NotificacaoResponse;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -45,6 +46,12 @@ public class NotificacaoResource {
     @Path("/{id}")
     public NotificacaoResponse atualizar(@PathParam("id") int id, NotificacaoRequest req) {
         return bo.atualizar(id, req);
+    }
+
+    @PATCH
+    @Path("/{id}/lida")
+    public NotificacaoResponse marcarLida(@PathParam("id") int id) {
+        return bo.marcarLida(id);
     }
 
     @DELETE
