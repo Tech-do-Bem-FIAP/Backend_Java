@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
  * <p>POST /api/admin/rebuild — Executa o script de reconstrucao do banco
  * embarcado em {@code src/main/resources/seed/rebuild.sql}. Apaga todas as
  * tabelas, recria o schema e carrega massa de dados realista. So pode ser
- * chamado com email="ADMIN", senha="ADMIN" e confirmacao="RECONSTRUIR".
+ * chamado com email="admin@admin.com", senha="admin" e confirmacao="RECONSTRUIR".
  */
 @Path("/api/admin")
 @Produces(MediaType.APPLICATION_JSON)
