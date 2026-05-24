@@ -6,4 +6,11 @@ public record PacienteRequest(
         String dataNasc,
         String telefone,
         String email,
-        int idDentista) {}
+        int idDentista,
+        String cep,
+        String logradouro,
+        String bairro,
+        String cidade,
+        String uf,
+        Double latitude,
+        Double longitude) {}
