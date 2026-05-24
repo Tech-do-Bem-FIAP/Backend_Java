@@ -104,13 +104,41 @@ public class PacienteBO {
 
     private Paciente fromRequest(PacienteRequest r, int id) {
         return new Paciente(id, r.nome(), r.cpf(), DataUtil.parse(r.dataNasc()),
-                r.telefone(), r.email(), r.idDentista());
+                r.telefone(), r.email(), r.idDentista(),
+                r.cep(), r.logradouro(), r.bairro(),
+                r.cidade(), r.uf(),
+                r.latitude(), r.longitude());
     }
 
-    private PacienteResponse toResponse(Paciente p) {
+    public PacienteResponse toResponse(Paciente p) {
         return new PacienteResponse(p.getIdPaciente(), p.getNome(), p.getCpf(),
                 DataUtil.format(p.getDataNasc()), p.getTelefone(),
-                p.getEmail(), p.getIdDentista());
+                p.getEmail(), p.getIdDentista(),
+                p.getCep(), p.getLogradouro(), p.getBairro(),
+                p.getCidade(), p.getUf(),
+                p.getLatitude(), p.getLongitude());
+    }
+
+    /**
+     * Retorna apenas pacientes com latitude E longitude preenchidas.
+     * Util para o mapa de geocoding na UI.
+     */
+    public List<Paciente> listarComGeo() {
+        PacienteDAO dao = null;
+        try {
+            dao = new PacienteDAO();
+            List<Paciente> out = new ArrayList<>();
+            for (Paciente p : dao.selecionar()) {
+                if (p.getLatitude() != null && p.getLongitude() != null) {
+                    out.add(p);
+                }
+            }
+            return out;
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new PersistenciaException("Erro ao listar pacientes com geo", e);
+        } finally {
+            fechar(dao);
+        }
     }
 
     private void fechar(PacienteDAO dao) {

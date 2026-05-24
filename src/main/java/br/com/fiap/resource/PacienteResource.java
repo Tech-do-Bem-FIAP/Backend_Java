@@ -14,6 +14,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Path("/api/pacientes")
 @Produces(MediaType.APPLICATION_JSON)
@@ -25,6 +26,14 @@ public class PacienteResource {
     @GET
     public List<PacienteResponse> listar() {
         return bo.listar();
+    }
+
+    @GET
+    @Path("/geo")
+    public List<PacienteResponse> listarComGeo() {
+        return bo.listarComGeo().stream()
+                .map(bo::toResponse)
+                .collect(Collectors.toList());
     }
 
     @GET

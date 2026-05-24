@@ -3,6 +3,7 @@ package br.com.fiap.dao;
 import br.com.fiap.conexoes.ConexaoFactory;
 import br.com.fiap.entities.Paciente;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -23,8 +24,9 @@ public class PacienteDAO {
             return "Erro: CPF invalido. Quando informado, deve ter 11 digitos.";
         }
         String sql = "INSERT INTO T_PACIENTE " +
-                "(ID_PACIENTE, NOME, CPF, DATA_NASC, TELEFONE, EMAIL, ID_DENTISTA) " +
-                "VALUES (SEQ_PACIENTE.NEXTVAL, ?, ?, ?, ?, ?, ?)";
+                "(ID_PACIENTE, NOME, CPF, DATA_NASC, TELEFONE, EMAIL, ID_DENTISTA, " +
+                " CEP, LOGRADOURO, BAIRRO, CIDADE, UF, LATITUDE, LONGITUDE) " +
+                "VALUES (SEQ_PACIENTE.NEXTVAL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         stmt.setString(1, p.getNome());
         if (p.getCpf() != null) {
@@ -36,6 +38,13 @@ public class PacienteDAO {
         stmt.setString(4, p.getTelefone());
         stmt.setString(5, p.getEmail());
         stmt.setInt(6, p.getIdDentista());
+        setStringOrNull(stmt,  7, p.getCep());
+        setStringOrNull(stmt,  8, p.getLogradouro());
+        setStringOrNull(stmt,  9, p.getBairro());
+        setStringOrNull(stmt, 10, p.getCidade());
+        setStringOrNull(stmt, 11, p.getUf());
+        setDoubleOrNull(stmt, 12, p.getLatitude());
+        setDoubleOrNull(stmt, 13, p.getLongitude());
         stmt.execute();
         stmt.close();
         return "Paciente cadastrado com sucesso!";
@@ -43,7 +52,8 @@ public class PacienteDAO {
 
     public String atualizar(Paciente p) throws SQLException {
         String sql = "UPDATE T_PACIENTE SET NOME=?, CPF=?, DATA_NASC=?, TELEFONE=?, " +
-                "EMAIL=?, ID_DENTISTA=? WHERE ID_PACIENTE=?";
+                "EMAIL=?, ID_DENTISTA=?, CEP=?, LOGRADOURO=?, BAIRRO=?, CIDADE=?, " +
+                "UF=?, LATITUDE=?, LONGITUDE=? WHERE ID_PACIENTE=?";
         PreparedStatement stmt = minhaConexao.prepareStatement(sql);
         stmt.setString(1, p.getNome());
         if (p.getCpf() != null) {
@@ -55,10 +65,33 @@ public class PacienteDAO {
         stmt.setString(4, p.getTelefone());
         stmt.setString(5, p.getEmail());
         stmt.setInt(6, p.getIdDentista());
-        stmt.setInt(7, p.getIdPaciente());
+        setStringOrNull(stmt,  7, p.getCep());
+        setStringOrNull(stmt,  8, p.getLogradouro());
+        setStringOrNull(stmt,  9, p.getBairro());
+        setStringOrNull(stmt, 10, p.getCidade());
+        setStringOrNull(stmt, 11, p.getUf());
+        setDoubleOrNull(stmt, 12, p.getLatitude());
+        setDoubleOrNull(stmt, 13, p.getLongitude());
+        stmt.setInt(14, p.getIdPaciente());
         stmt.executeUpdate();
         stmt.close();
         return "Paciente atualizado com sucesso!";
+    }
+
+    private static void setStringOrNull(PreparedStatement stmt, int idx, String value) throws SQLException {
+        if (value == null) {
+            stmt.setNull(idx, Types.VARCHAR);
+        } else {
+            stmt.setString(idx, value);
+        }
+    }
+
+    private static void setDoubleOrNull(PreparedStatement stmt, int idx, Double value) throws SQLException {
+        if (value == null) {
+            stmt.setNull(idx, Types.DOUBLE);
+        } else {
+            stmt.setDouble(idx, value);
+        }
     }
 
     public String deletar(int id) throws SQLException {
@@ -111,6 +144,17 @@ public class PacienteDAO {
         p.setTelefone(rs.getString("TELEFONE"));
         p.setEmail(rs.getString("EMAIL"));
         p.setIdDentista(rs.getInt("ID_DENTISTA"));
+        p.setCep(rs.getString("CEP"));
+        p.setLogradouro(rs.getString("LOGRADOURO"));
+        p.setBairro(rs.getString("BAIRRO"));
+        p.setCidade(rs.getString("CIDADE"));
+        p.setUf(rs.getString("UF"));
+        // CRITICO: rs.getDouble retorna 0.0 quando o valor eh NULL.
+        // Usamos BigDecimal para preservar NULL em latitude/longitude.
+        BigDecimal lat = rs.getBigDecimal("LATITUDE");
+        BigDecimal lng = rs.getBigDecimal("LONGITUDE");
+        p.setLatitude(lat  != null ? lat.doubleValue()  : null);
+        p.setLongitude(lng != null ? lng.doubleValue() : null);
         return p;
     }
 }
