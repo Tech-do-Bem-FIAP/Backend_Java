@@ -274,9 +274,9 @@ CREATE TABLE FK_EXAME_ATEND (
 
 -- ------------------------------------------------------------
 -- T_COLABORADOR (11 registros)
--- 1º registro: ADMIN/ADMIN para acesso de reconstrução do banco
+-- 1º registro: admin@admin.com / admin para acesso de reconstrução do banco
 -- ------------------------------------------------------------
-INSERT INTO T_COLABORADOR (ID_COLABORADOR, NOME, CPF, EMAIL, SENHA, CARGO, DISPONIBILIDADE) VALUES (SEQ_COLABORADOR.NEXTVAL, 'Admin Sistema', '00000000000', 'ADMIN', 'ADMIN', 'Administrador', 1);
+INSERT INTO T_COLABORADOR (ID_COLABORADOR, NOME, CPF, EMAIL, SENHA, CARGO, DISPONIBILIDADE) VALUES (SEQ_COLABORADOR.NEXTVAL, 'Admin Sistema', '00000000000', 'admin@admin.com', 'admin', 'Administrador', 1);
 INSERT INTO T_COLABORADOR (ID_COLABORADOR, NOME, CPF, EMAIL, SENHA, CARGO, DISPONIBILIDADE) VALUES (SEQ_COLABORADOR.NEXTVAL, 'Ana Lima', '11111111101', 'ana.lima@techbem.com', 'ana123', 'Administrador', 1);
 INSERT INTO T_COLABORADOR (ID_COLABORADOR, NOME, CPF, EMAIL, SENHA, CARGO, DISPONIBILIDADE) VALUES (SEQ_COLABORADOR.NEXTVAL, 'Carlos Mendes', '11111111102', 'carlos.mendes@techbem.com', 'car234', 'Coordenador', 1);
 INSERT INTO T_COLABORADOR (ID_COLABORADOR, NOME, CPF, EMAIL, SENHA, CARGO, DISPONIBILIDADE) VALUES (SEQ_COLABORADOR.NEXTVAL, 'Beatriz Souza', '11111111103', 'beatriz.souza@techbem.com', 'bea345', 'Coordenador', 1);

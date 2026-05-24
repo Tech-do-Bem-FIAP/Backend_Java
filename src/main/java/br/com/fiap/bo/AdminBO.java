@@ -113,8 +113,8 @@ public class AdminBO {
 
     private void validarCredenciais(AdminRebuildRequest req) {
         if (req == null
-                || !"ADMIN".equals(req.email())
-                || !"ADMIN".equals(req.senha())
+                || !"admin@admin.com".equals(req.email())
+                || !"admin".equals(req.senha())
                 || !"RECONSTRUIR".equals(req.confirmacao())) {
             throw new DadoInvalidoException(
                     "Credenciais admin invalidas ou confirmacao incorreta.");
